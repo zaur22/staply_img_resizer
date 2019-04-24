@@ -1,7 +1,9 @@
 package config
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/spf13/viper"
@@ -105,8 +107,10 @@ func init() {
 	viper.SetDefault(IdleConnTimeoutSec, 90)
 	viper.SetDefault(MaxIdleConns, 100)
 	viper.SetDefault(MaxIdleConnsPerHost, 100)
-	viper.SetDefault(FileSaveDir, "")
+	viper.SetDefault(FileSaveDir, "./thumbnails")
 	viper.SetDefault(MaxImageSizeByte, 15*1024*1024)
+
+	makeImgSaveDir()
 
 	HTTPClient = &http.Client{
 		Transport: &http.Transport{
@@ -120,3 +124,18 @@ func init() {
 
 //HTTPClient настроенный клиент
 var HTTPClient *http.Client
+
+func makeImgSaveDir() {
+	dir := GetString(FileSaveDir)
+	if _, err := os.Stat(dir); err != nil {
+		if os.IsNotExist(err) {
+			err := os.MkdirAll(dir, 0700)
+			if err != nil {
+				log.Fatalf("Can't make dir %s: %s", dir, err)
+			}
+		} else {
+			log.Fatalf("Can't get dir %s: %s", dir, err)
+		}
+	}
+
+}
