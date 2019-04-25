@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"path"
-	"staply_img_resize/config"
+	"staply_img_resizer/config"
 	"sync"
 	"time"
 

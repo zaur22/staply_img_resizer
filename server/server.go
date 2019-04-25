@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"staply_img_resize/resizer"
-	router "staply_img_resize/router"
+	"staply_img_resizer/config"
+	"staply_img_resizer/resizer"
+	router "staply_img_resizer/router"
 	"syscall"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 type Server struct {
@@ -21,10 +20,6 @@ type Server struct {
 	workerStop func()
 }
 
-func init() {
-	viper.SetDefault("server_addr", "localhost:3000")
-}
-
 func NewServer() *Server {
 
 	reszr := resizer.NewImgResizer()
@@ -32,7 +27,7 @@ func NewServer() *Server {
 
 	var server = Server{
 		s: &http.Server{
-			Addr:           viper.GetString("server_addr"),
+			Addr:           config.GetString(config.ServerRunAddress),
 			Handler:        &router,
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,

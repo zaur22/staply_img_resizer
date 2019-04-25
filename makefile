@@ -16,7 +16,6 @@ json_test:
 	(echo -n '{"image": "'; base64 test_data/json.jpg; echo '"}') | \
 	curl -H "Content-Type: application/json" -d @-  $(ADDRESS) 
 
-
 clean:
 	rm -r thumbnails
 

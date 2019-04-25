@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  resizer:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+    - server_addr = "localhos:3000"
+    - resize_worker_count = 10
+    - file_save_worker_count = 10
+    - request_img_worker_count = 10
+    - resize_channel_size = 10
+    - file_save_channel_size = 10
+    - request_img_channel_size = 10
+    - job_timeout_sec = 10
+    - file_save_dir = "./out"

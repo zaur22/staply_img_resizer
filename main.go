@@ -1,7 +1,7 @@
 package main
 
 import (
-	serv "staply_img_resize/server"
+	serv "staply_img_resizer/server"
 )
 
 func main() {

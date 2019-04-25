@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"mime"
 	"net/http"
-	"staply_img_resize/config"
-	"staply_img_resize/resizer"
+	"staply_img_resizer/config"
+	"staply_img_resizer/resizer"
 	"strconv"
 )
 

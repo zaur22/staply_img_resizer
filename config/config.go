@@ -91,6 +91,8 @@ const (
 
 	//MaxIdleConnsPerHost максимальное количество одновременнх подключений для одного хоста
 	MaxIdleConnsPerHost = "max_idle_conns_per_host"
+
+	ServerRunAddress = "server_addr"
 )
 
 func init() {
@@ -109,7 +111,7 @@ func init() {
 	viper.SetDefault(MaxIdleConnsPerHost, 100)
 	viper.SetDefault(FileSaveDir, "./thumbnails")
 	viper.SetDefault(MaxImageSizeByte, 15*1024*1024)
-
+	viper.SetDefault(ServerRunAddress, "localhost:3000")
 	makeImgSaveDir()
 
 	HTTPClient = &http.Client{
