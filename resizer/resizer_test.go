@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"staply_img_resize/config"
+	"staply_img_resizer/config"
 	"sync"
 	"testing"
 )
