@@ -96,6 +96,7 @@ const (
 )
 
 func init() {
+	viper.AutomaticEnv()
 	viper.SetDefault(ResizeWorkerCount, 10)
 	viper.SetDefault(FileSaveWorkerCount, 10)
 	viper.SetDefault(RequestImgWorkerCount, 100)

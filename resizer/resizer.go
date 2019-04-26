@@ -15,17 +15,6 @@ import (
 )
 
 func init() {
-	vips.Startup(
-		&vips.Config{
-			ConcurrencyLevel: config.GetInt(config.VipsConcurrencyLevel),
-			MaxCacheFiles:    config.GetInt(config.VipsMaxCashFiles),
-			MaxCacheSize:     config.GetInt(config.VipsMaxCashSize),
-			MaxCacheMem:      config.GetInt(config.VipsMaxCacheMem),
-			CacheTrace:       config.GetBool(config.VipsCacheTrace),
-			CollectStats:     config.GetBool(config.VipsCollectStats),
-		},
-	)
-
 	client = config.HTTPClient
 }
 
@@ -59,6 +48,7 @@ type requestJob struct {
 	err chan error
 }
 
+//NewImgResizer создаёт resizer с запущенными воркерами и настраивает vips
 func NewImgResizer() *ImgResizer {
 	resizer := ImgResizer{
 		resizeChan:     make(chan imgJob, config.GetInt(config.ResizeChannelSize)),
@@ -67,31 +57,25 @@ func NewImgResizer() *ImgResizer {
 		wg:             sync.WaitGroup{},
 	}
 
+	log.Printf("Resize channel size: %v", config.GetInt(config.ResizeChannelSize))
+	log.Printf("File save channel size: %v", config.GetInt(config.FileSaveChannelSize))
+	log.Printf("Request image channel size: %v", config.GetInt(config.RequestImgChannelSize))
+
+	vips.Startup(
+		&vips.Config{
+			ConcurrencyLevel: config.GetInt(config.VipsConcurrencyLevel),
+			MaxCacheFiles:    config.GetInt(config.VipsMaxCashFiles),
+			MaxCacheSize:     config.GetInt(config.VipsMaxCashSize),
+			MaxCacheMem:      config.GetInt(config.VipsMaxCacheMem),
+			CacheTrace:       config.GetBool(config.VipsCacheTrace),
+			CollectStats:     config.GetBool(config.VipsCollectStats),
+		},
+	)
+
 	startResizeWorkerPool(&resizer.wg, resizer.resizeChan, resizer.fileSaveChan)
 	startFileSaveWorkerPool(&resizer.wg, resizer.fileSaveChan)
 	startRequestImgWorkerPool(&resizer.wg, resizer.requestImgChan, resizer.resizeChan)
 	return &resizer
-}
-
-func startResizeWorkerPool(wg *sync.WaitGroup, in <-chan imgJob, out chan<- imgJob) {
-	for i := 0; i < config.GetInt(config.ResizeWorkerCount); i++ {
-		go resizeWorker(wg, in, out)
-		wg.Add(1)
-	}
-}
-
-func startFileSaveWorkerPool(wg *sync.WaitGroup, in <-chan imgJob) {
-	for i := 0; i < config.GetInt(config.FileSaveWorkerCount); i++ {
-		go fileSaveWorker(wg, in)
-		wg.Add(1)
-	}
-}
-
-func startRequestImgWorkerPool(wg *sync.WaitGroup, in <-chan requestJob, out chan<- imgJob) {
-	for i := 0; i < config.GetInt(config.RequestImgWorkerCount); i++ {
-		go requestImgWorker(wg, in, out)
-		wg.Add(1)
-	}
 }
 
 func (r *ImgResizer) FromUrl(url string) error {
@@ -258,4 +242,34 @@ func writeErr(errChan chan<- error, err error) {
 		}
 	}()
 	errChan <- err
+}
+
+func startResizeWorkerPool(wg *sync.WaitGroup, in <-chan imgJob, out chan<- imgJob) {
+	for i := 0; i < config.GetInt(config.ResizeWorkerCount); i++ {
+		go resizeWorker(wg, in, out)
+		wg.Add(1)
+	}
+	log.Printf("The count of running resize workers: %v",
+		config.GetInt(config.ResizeWorkerCount),
+	)
+}
+
+func startFileSaveWorkerPool(wg *sync.WaitGroup, in <-chan imgJob) {
+	for i := 0; i < config.GetInt(config.FileSaveWorkerCount); i++ {
+		go fileSaveWorker(wg, in)
+		wg.Add(1)
+	}
+	log.Printf("The count of running file save workers: %v",
+		config.GetInt(config.FileSaveWorkerCount),
+	)
+}
+
+func startRequestImgWorkerPool(wg *sync.WaitGroup, in <-chan requestJob, out chan<- imgJob) {
+	for i := 0; i < config.GetInt(config.RequestImgWorkerCount); i++ {
+		go requestImgWorker(wg, in, out)
+		wg.Add(1)
+	}
+	log.Printf("The count of running request img workers: %v",
+		config.GetInt(config.RequestImgWorkerCount),
+	)
 }

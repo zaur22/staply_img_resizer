@@ -10,8 +10,8 @@ RUN apt-get update \
     && apt-get install -y gtk-doc-tools \
     && apt-get install -y libtool \
     && apt-get install -y autoconf \ 
-    && apt-get install -y gobject-introspection \
-    && apt-get install -y git
+    && apt-get install -y gobject-introspection
+    #&& apt-get install -y git
 
 
 RUN apt-get install -y \
@@ -28,25 +28,18 @@ RUN apt-get install -y \
     liborc-dev 
 
 WORKDIR /tmp/
-RUN apt-get -y install build-essential pkg-config glib2.0-dev libexpat1-dev \
-    && wget https://github.com/jcupitt/libvips/archive/v8.7.0.tar.gz
-
-RUN tar xzf v8.7.0.tar.gz \
+RUN wget https://github.com/jcupitt/libvips/archive/v8.7.0.tar.gz \
+    && tar xzf v8.7.0.tar.gz \
     && cd libvips-8.7.0 \
-    #&& chmod +x ./configure.ac \
-    #&& ./configure \
     && bash autogen.sh \
     && make \
     && make install \
     && ldconfig
 
+COPY . /go/src/staply_img_resizer
+WORKDIR /go/src/staply_img_resizer
+RUN go get ./... \
+    && go install ./... \
+    && go build .
 
-WORKDIR /go/src
-
-RUN git clone https://github.com/zaur22/staply_img_resizer.git \
-    && cd staply_img_resizer \
-    #&& go get -u github.com/davidbyttow/govips/pkg/vips \
-    && go get  ./... \
-    && go install -v ./... \
-    && go build main.go \
-    && ./main.go
+ENTRYPOINT ["./staply_img_resizer"]
